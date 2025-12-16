@@ -4,7 +4,7 @@ This project integrates a mobile robot (`fra2mo`) and a robotic manipulator (`ii
 
 ## 📦 Dependencies
 Ensure you have the following packages in your workspace `src` folder:
-* `ros2_fra2mo` (This package)
+* `ros2_fra2mo` 
 * `ros2_iiwa`
 * `ros2_kdl_package`
 * `aruco_ros` (External)
@@ -21,3 +21,8 @@ In this phase, the robot autonomously explores the unknown environment using SLA
 Load the world, robots, and ArUco detector:
 ```bash
 ros2 launch ros2_fra2mo project.launch.py
+
+**2. Start Autonomous Exploration**
+Launch the explore_lite node to auto-navigate and map the area:
+```bash
+ros2 launch ros2_fra2mo fra2mo_explore.launch.py
