@@ -17,12 +17,12 @@ Ensure you have the following packages in your workspace `src` folder:
 ### Part 1: Exploration & Target Detection
 In this phase, the robot autonomously explores the unknown environment using SLAM and detects the KUKA iiwa manipulator position.
 
-**1. Launch the Simulation**
+### 1. Launch the Simulation
 Load the world, robots, and ArUco detector:
 ```bash
 ros2 launch ros2_fra2mo project.launch.py
 ```
-**2. Start Autonomous Exploration**
+### 2. Start Autonomous Exploration
 Launch the explore_lite node to auto-navigate and map the area:
 ```bash
 ros2 launch ros2_fra2mo fra2mo_explore.launch.py
