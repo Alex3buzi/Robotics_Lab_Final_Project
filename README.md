@@ -18,7 +18,7 @@ Ensure you have the following packages in your workspace `src` folder:
 In this phase, the robot autonomously explores the unknown environment using SLAM and detects the KUKA iiwa manipulator position.
 
 ### 1. Launch the Simulation
-Load the world, robots, and ArUco detector:
+Load the world, robots:
 ```bash
 ros2 launch ros2_fra2mo project.launch.py
 ```
