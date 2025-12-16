@@ -21,8 +21,9 @@ In this phase, the robot autonomously explores the unknown environment using SLA
 Load the world, robots, and ArUco detector:
 ```bash
 ros2 launch ros2_fra2mo project.launch.py
-
+```
 **2. Start Autonomous Exploration**
 Launch the explore_lite node to auto-navigate and map the area:
 ```bash
 ros2 launch ros2_fra2mo fra2mo_explore.launch.py
+```
