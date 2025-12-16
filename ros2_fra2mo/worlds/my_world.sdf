@@ -1,0 +1,280 @@
+<?xml version="1.0" ?>
+<sdf version="1.7">
+    <world name="custom_room">
+        
+        <physics name="1ms" type="ignored">
+            <max_step_size>0.001</max_step_size>
+            <real_time_factor>1.0</real_time_factor>
+            <real_time_update_rate>1000</real_time_update_rate>
+        </physics>
+
+        <plugin filename="libignition-gazebo-physics-system.so" name="ignition::gazebo::systems::Physics"></plugin>
+        <plugin filename="libignition-gazebo-user-commands-system.so" name="ignition::gazebo::systems::UserCommands"></plugin>
+        <plugin filename="libignition-gazebo-sensors-system.so" name="ignition::gazebo::systems::Sensors">
+            <render_engine>ogre2</render_engine>
+        </plugin>
+        <plugin filename="libignition-gazebo-scene-broadcaster-system.so" name="ignition::gazebo::systems::SceneBroadcaster"></plugin>
+
+        <light type="directional" name="sun">
+            <cast_shadows>true</cast_shadows>
+            <pose>0 0 10 0 0 0</pose>
+            <diffuse>0.8 0.8 0.8 1</diffuse>
+            <specular>0.2 0.2 0.2 1</specular>
+            <direction>-0.5 0.1 -0.9</direction>
+        </light>
+
+        <model name="ground_plane">
+            <static>true</static>
+            <link name="link">
+                <collision name="collision">
+                    <geometry>
+                        <plane>
+                            <normal>0 0 1</normal>
+                            <size>100 100</size>
+                        </plane>
+                    </geometry>
+                    <surface>
+                        <friction>
+                            <ode><mu>100</mu><mu2>50</mu2></ode>
+                        </friction>
+                    </surface>
+                </collision>
+                <visual name="visual">
+                    <geometry>
+                        <plane>
+                            <normal>0 0 1</normal>
+                            <size>100 100</size>
+                        </plane>
+                    </geometry>
+                    <material>
+                        <ambient>0.8 0.8 0.8 1</ambient>
+                        <diffuse>0.8 0.8 0.8 1</diffuse>
+                        <specular>0.8 0.8 0.8 1</specular>
+                    </material>
+                </visual>
+            </link>
+        </model>
+
+        <model name='wall_north'>
+            <static>true</static>
+            <pose>0 7.5 1 0 0 0</pose>
+            <link name='link'>
+                <collision name='collision'>
+                    <geometry><box><size>15 0.2 2</size></box></geometry>
+                </collision>
+                <visual name='visual'>
+                    <geometry><box><size>15 0.2 2</size></box></geometry>
+                    <material><ambient>0.0 0.0 1.0 1</ambient><diffuse>0.0 0.0 1.0 1</diffuse></material>
+                </visual>
+            </link>
+        </model>
+
+        <model name='wall_south'>
+            <static>true</static>
+            <pose>0 -7.5 1 0 0 0</pose>
+            <link name='link'>
+                <collision name='collision'>
+                    <geometry><box><size>15 0.2 2</size></box></geometry>
+                </collision>
+                <visual name='visual'>
+                    <geometry><box><size>15 0.2 2</size></box></geometry>
+                    <material><ambient>0.0 0.0 1.0 1</ambient><diffuse>0.0 0.0 1.0 1</diffuse></material>
+                </visual>
+            </link>
+        </model>
+
+        <model name='wall_east'>
+            <static>true</static>
+            <pose>7.5 0 1 0 0 0</pose>
+            <link name='link'>
+                <collision name='collision'>
+                    <geometry><box><size>0.2 15 2</size></box></geometry>
+                </collision>
+                <visual name='visual'>
+                    <geometry><box><size>0.2 15 2</size></box></geometry>
+                    <material><ambient>0.0 0.0 1.0 1</ambient><diffuse>0.0 0.0 1.0 1</diffuse></material>
+                </visual>
+            </link>
+        </model>
+
+        <model name='wall_west'>
+            <static>true</static>
+            <pose>-7.5 0 1 0 0 0</pose>
+            <link name='link'>
+                <collision name='collision'>
+                    <geometry><box><size>0.2 15 2</size></box></geometry>
+                </collision>
+                <visual name='visual'>
+                    <geometry><box><size>0.2 15 2</size></box></geometry>
+                    <material><ambient>0.0 0.0 1.0 1</ambient><diffuse>0.0 0.0 1.0 1</diffuse></material>
+                </visual>
+            </link>
+        </model>
+
+        <model name='obs_cylinder_red'>
+            <static>true</static>
+            <pose>3 3 1 0 0 0</pose>
+            <link name='link'>
+                <collision name='collision'>
+                    <geometry><cylinder><radius>0.5</radius><length>2</length></cylinder></geometry>
+                </collision>
+                <visual name='visual'>
+                    <geometry><cylinder><radius>0.5</radius><length>2</length></cylinder></geometry>
+                    <material><ambient>1 0 0 1</ambient><diffuse>1 0 0 1</diffuse></material>
+                </visual>
+            </link>
+        </model>
+
+        <model name='obs_box_green'>
+            <static>true</static>
+            <pose>-4.98 5.30 0.5 0 0 0</pose>
+            <link name='link'>
+                <collision name='collision'>
+                    <geometry><box><size>1 1 1</size></box></geometry>
+                </collision>
+                <visual name='visual'>
+                    <geometry><box><size>1 1 1</size></box></geometry>
+                    <material><ambient>0 1 0 1</ambient><diffuse>0 1 0 1</diffuse></material>
+                </visual>
+            </link>
+        </model>
+
+        <model name='obs_sphere_yellow'>
+            <static>true</static>
+            <pose>-5.11 -3.77 0.5 0 0 0</pose>
+            <link name='link'>
+                <collision name='collision'>
+                    <geometry><sphere><radius>0.5</radius></sphere></geometry>
+                </collision>
+                <visual name='visual'>
+                    <geometry><sphere><radius>0.5</radius></sphere></geometry>
+                    <material><ambient>1 1 0 1</ambient><diffuse>1 1 0 1</diffuse></material>
+                </visual>
+            </link>
+        </model>
+
+        <model name='obs_wall_purple'>
+            <static>true</static>
+            <pose>4.67 -4.34 0.5 0 0 0.785</pose> <link name='link'>
+                <collision name='collision'>
+                    <geometry><box><size>4 0.2 1</size></box></geometry>
+                </collision>
+                <visual name='visual'>
+                    <geometry><box><size>4 0.2 1</size></box></geometry>
+                    <material><ambient>0.5 0 0.5 1</ambient><diffuse>0.5 0 0.5 1</diffuse></material>
+                </visual>
+            </link>
+        </model>
+
+        <model name='wall_internal'>
+            <static>true</static>
+            <pose>-2.47 4.91 1 0 0 0</pose>
+            <link name='link'>
+                <collision name='collision'>
+                    <geometry><box><size>0.2 5 2</size></box></geometry>
+                </collision>
+                <visual name='visual'>
+                    <geometry><box><size>0.2 5 2</size></box></geometry>
+                    <material><ambient>0.0 1.0 1.0 1</ambient><diffuse>0.0 0.5 1.0 1</diffuse></material>
+                </visual>
+            </link>
+        </model>
+
+        <model name='wall_internal_1'>
+            <static>true</static>
+            <pose>1.48 4.91 1 0 0 0</pose>
+            <link name='link'>
+                <collision name='collision'>
+                    <geometry><box><size>0.2 5 2</size></box></geometry>
+                </collision>
+                <visual name='visual'>
+                    <geometry><box><size>0.2 5 2</size></box></geometry>
+                    <material><ambient>0.0 1.0 1.0 1</ambient><diffuse>0.0 0.5 1.0 1</diffuse></material>
+                </visual>
+            </link>
+        </model>        
+
+        <model name='wall_internal_2'>
+            <static>true</static>
+            <pose>1.48 -4.91 1 0 0 0</pose>
+            <link name='link'>
+                <collision name='collision'>
+                    <geometry><box><size>0.2 5 2</size></box></geometry>
+                </collision>
+                <visual name='visual'>
+                    <geometry><box><size>0.2 5 2</size></box></geometry>
+                    <material><ambient>0.0 1.0 1.0 1</ambient><diffuse>0.0 0.5 1.0 1</diffuse></material>
+                </visual>
+            </link>
+        </model>     
+
+        <model name='wall_internal_3'>
+            <static>true</static>
+            <pose>-2.5 -4.91 1 0 0 0</pose>
+            <link name='link'>
+                <collision name='collision'>
+                    <geometry><box><size>0.2 5 2</size></box></geometry>
+                </collision>
+                <visual name='visual'>
+                    <geometry><box><size>0.2 5 2</size></box></geometry>
+                    <material><ambient>0.0 1.0 1.0 1</ambient><diffuse>0.0 0.5 1.0 1</diffuse></material>
+                </visual>
+            </link>
+        </model>       
+
+        <model name='wall_internal_4'>
+            <static>true</static>
+            <pose>4.91 0.1 1 0 0 -1.56</pose>
+            <link name='link'>
+                <collision name='collision'>
+                    <geometry><box><size>0.2 5 2</size></box></geometry>
+                </collision>
+                <visual name='visual'>
+                    <geometry><box><size>0.2 5 2</size></box></geometry>
+                    <material><ambient>0.0 1.0 1.0 1</ambient><diffuse>0.0 0.5 1.0 1</diffuse></material>
+                </visual>
+            </link>
+        </model> 
+
+        <model name='wall_internal_5'>
+            <static>true</static>
+            <pose>-4.88 0 1 0 0 -1.56</pose>
+            <link name='link'>
+                <collision name='collision'>
+                    <geometry><box><size>0.2 5 2</size></box></geometry>
+                </collision>
+                <visual name='visual'>
+                    <geometry><box><size>0.2 5 2</size></box></geometry>
+                    <material><ambient>0.0 1.0 1.0 1</ambient><diffuse>0.0 0.5 1.0 1</diffuse></material>
+                </visual>
+            </link>
+        </model>           
+
+        <model name='obs_pillar_cyan'>
+            <static>true</static>
+            <pose>-0.66 5 1 0 0 0</pose>
+            <link name='link'>
+                <collision name='collision'>
+                    <geometry><cylinder><radius>0.2</radius><length>2</length></cylinder></geometry>
+                </collision>
+                <visual name='visual'>
+                    <geometry><cylinder><radius>0.2</radius><length>2</length></cylinder></geometry>
+                    <material><ambient>0 1 1 1</ambient><diffuse>0 1 1 1</diffuse></material>
+                </visual>
+            </link>
+        </model>
+
+
+    <include>
+      <uri>
+        model://arucotag_100
+      </uri>
+      <name>arucotag</name>
+      <pose>-5.30 3.48 0.12 0.87 1.53 0.06</pose>
+    </include>
+
+
+    
+
+    </world>
+</sdf>
