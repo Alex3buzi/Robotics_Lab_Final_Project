@@ -3,6 +3,7 @@
 import os
 import yaml
 from geometry_msgs.msg import PoseStamped
+from std_msgs.msg import Bool
 from nav2_simple_commander.robot_navigator import BasicNavigator, TaskResult
 import rclpy
 from rclpy.duration import Duration
@@ -10,6 +11,10 @@ from rclpy.duration import Duration
 
 def main():
     rclpy.init()
+
+    handover_node = rclpy.create_node('handover_publisher')
+    pub_handover = handover_node.create_publisher(Bool, '/fra2mo/ready_for_handover', 10)
+    
     navigator = BasicNavigator()
 
     config_path = os.path.join(os.getenv('HOME'), 'ros2_ws/src/ros2_fra2mo/config/iiwa_goal.yaml')
@@ -36,8 +41,8 @@ def main():
     goal_pose.header.stamp = navigator.get_clock().now().to_msg()
 
     #Offset
-    offset_x = -1.5
-    offset_y = 0.0
+    offset_x = -0.8
+    offset_y = 0.1
 
     final_x = target_x + offset_x
     final_y = target_y + offset_y
@@ -50,13 +55,14 @@ def main():
     goal_pose.pose.position.y = final_y
 
     goal_pose.pose.orientation.z = 0.0
-    goal_pose.pose.orientation.w = 0.0
+    goal_pose.pose.orientation.w = 1.0
 
 
     print(f"Sending robot to: {target_x}, {target_y}...")
     navigator.goToPose(goal_pose)
 
     i = 0
+    goal_reached = False
     GOAL_TOLERANCE = 0.15
     while not navigator.isTaskComplete():
         
@@ -69,6 +75,7 @@ def main():
             if distance_remaining < GOAL_TOLERANCE:
                 print(f'\n[INFO] Target close enough ({distance_remaining:.2f}m < {GOAL_TOLERANCE}m). Stopping manually.')
                 navigator.cancelTask()
+                goal_reached = True
                 break
 
             if i % 5 == 0:
@@ -76,7 +83,19 @@ def main():
 
             if Duration.from_msg(feedback.navigation_time) > Duration(seconds=600):
                 navigator.cancelTask()
-
+                
+    if goal_reached:
+        print("\n[INFO] Preparing to send handover signal to iiwa...")
+        msg = Bool()
+        msg.data = True
+        
+        # Pubblichiamo in un piccolo loop per assicurarci che il messaggio venga inviato e processato
+        for _ in range(5):
+            pub_handover.publish(msg)
+            rclpy.spin_once(handover_node, timeout_sec=0.1)
+        
+        print("[INFO] SIGNAL SENT: /fra2mo/ready_for_handover = True")
+    
     result = navigator.getResult()
     
     if result == TaskResult.SUCCEEDED:
@@ -88,7 +107,8 @@ def main():
     else:
         print('Goal has an invalid return status!')
 
-    exit(0)
+    handover_node.destroy_node()
+    rclpy.shutdown()
 
 
 if __name__ == '__main__':
