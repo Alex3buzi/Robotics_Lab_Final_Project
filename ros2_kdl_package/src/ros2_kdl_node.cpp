@@ -14,6 +14,7 @@
 #include "std_msgs/msg/float64_multi_array.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 #include "geometry_msgs/msg/pose_stamped.hpp"
+#include "std_msgs/msg/bool.hpp"
 #include <Eigen/Geometry>
 
 #include "rclcpp/rclcpp.hpp"
@@ -74,7 +75,7 @@ class Iiwa_pub_sub : public rclcpp::Node
             declare_parameter("acc_duration", 0.5);
             declare_parameter("total_time", 1.5);
             declare_parameter("trajectory_len", 150);
-            declare_parameter("Kp", -1.0);
+            declare_parameter("Kp", 0.5);
             declare_parameter("end_position_x", 0.3);
             declare_parameter("end_position_y", 0.0);
             declare_parameter("end_position_z", 0.4);
@@ -124,18 +125,26 @@ class Iiwa_pub_sub : public rclcpp::Node
             joint_positions_cmd_.resize(nj); 
             joint_velocities_cmd_.resize(nj); 
             joint_efforts_cmd_.resize(nj); joint_efforts_cmd_.data.setZero();
-
-          
+      
+            //Subscribers
             jointSubscriber_ = this->create_subscription<sensor_msgs::msg::JointState>(
                 "/iiwa/joint_states", 10, std::bind(&Iiwa_pub_sub::joint_state_subscriber, this, std::placeholders::_1));
-
-           
+         
             vision_target_sub_ = this->create_subscription<geometry_msgs::msg::PoseStamped>(
                 "/iiwa/aruco_single/pose", 10,
                 std::bind(&Iiwa_pub_sub::vision_target_callback, this, std::placeholders::_1)
             );
 
-    
+            handover_sub_ = this->create_subscription<std_msgs::msg::Bool>(
+                "/fra2mo/ready_for_handover", 10,
+                [this](const std_msgs::msg::Bool::SharedPtr msg) {
+                    if (msg->data) {
+                        RCLCPP_INFO(this->get_logger(), "HANDSHAKE RECEIVED: Starting Vision Control!");
+                        this->start_vision_control_ = true;
+                    }
+                }
+            );
+
             while(!joint_state_available_){
                 RCLCPP_INFO(this->get_logger(), "No data received yet! ...");
                 rclcpp::spin_some(node_handle_);
@@ -270,17 +279,25 @@ class Iiwa_pub_sub : public rclcpp::Node
             vision_target_available_ = true;
         }
 
-
-
-
-
     private:
-
 
         void cmd_publisher(){
 
-            iteration_ = iteration_ + 1;
+            if (ctrl_ == "vision_ctrl" && !start_vision_control_) {
+                // Keep the robot still (send 0 velocity)
+                for (long int i = 0; i < joint_velocities_.data.size(); ++i) {
+                    desired_commands_[i] = 0.0;
+                }
+                std_msgs::msg::Float64MultiArray cmd_msg;
+                cmd_msg.data = desired_commands_;
+                cmdPublisher_->publish(cmd_msg);
+                
+                // Print waiting status occasionally (throttle log)
+                RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 2000, "Waiting for fra2mo handover signal...");
+                return; 
+            }
 
+            iteration_ = iteration_ + 1;
 
             double total_time = total_time_; 
             int trajectory_len = trajectory_len_; 
@@ -316,12 +333,9 @@ class Iiwa_pub_sub : public rclcpp::Node
                     }
                 }
 
-
                 KDL::Frame cartpos = robot_->getEEFrame();           
 
-
                 KDL::Frame desFrame; desFrame.M = cartpos.M; desFrame.p = toKDL(p_.pos); 
-
 
                 Eigen::Vector3d error = computeLinearError(p_.pos, Eigen::Vector3d(cartpos.p.data));
                 Eigen::Vector3d o_error = computeOrientationError(toEigen(init_cart_pose_.M), toEigen(cartpos.M));
@@ -329,8 +343,6 @@ class Iiwa_pub_sub : public rclcpp::Node
                 if(ctrl_ != "vision_ctrl"){
                     std::cout << "The error norm is : " << error.norm() << std::endl;
                 }
- 
-
 
                 if(cmd_interface_ == "position"){
 
@@ -355,7 +367,6 @@ class Iiwa_pub_sub : public rclcpp::Node
                 {
                      if(vision_target_available_)
                     {
-
                         joint_velocities_cmd_.data = controller_->velocity_ctrl_vision(
                             vision_target_pos_,  
                             joint_positions_.data, 
@@ -366,15 +377,6 @@ class Iiwa_pub_sub : public rclcpp::Node
                         joint_velocities_cmd_.data.setZero(joint_velocities_cmd_.data.size());
                         RCLCPP_WARN_THROTTLE(get_logger(), *get_clock(), 2000, "No pose visible!");
                     }
-
-
-                    std_msgs::msg::Float64MultiArray cmd_msg;
-                    cmd_msg.data = toStdVector(joint_velocities_cmd_.data);
-                    cmdPublisher_->publish(cmd_msg);
-                    
-                }
-
-
                 }
                 else if(cmd_interface_ == "effort"){
                     joint_efforts_cmd_.data[0] = 0.1*std::sin(2*M_PI*t_/total_time);
@@ -508,7 +510,10 @@ class Iiwa_pub_sub : public rclcpp::Node
         Eigen::Vector3d vision_target_pos_;
         bool vision_target_available_ = false;
         rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr vision_target_sub_;
-        
+         
+        rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr handover_sub_;
+        bool start_vision_control_ = false; 
+         
         rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr jointSubscriber_;
         rclcpp::Publisher<FloatArray>::SharedPtr cmdPublisher_;
         rclcpp::TimerBase::SharedPtr timer_; 
