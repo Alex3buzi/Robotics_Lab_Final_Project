@@ -401,7 +401,7 @@ def generate_launch_description():
         parameters=[{
             'image_is_rectified': True,
             'marker_size': 0.1,          
-            'marker_id': 50,            
+            'marker_id': 100,            
             'reference_frame': '',       
             'camera_frame': 'fra2mo_d435_link', 
             'marker_frame': 'detected_marker'
