@@ -75,7 +75,7 @@ class Iiwa_pub_sub : public rclcpp::Node
             declare_parameter("acc_duration", 0.5);
             declare_parameter("total_time", 1.5);
             declare_parameter("trajectory_len", 150);
-            declare_parameter("Kp", 0.5);
+            declare_parameter("Kp", -0.5);
             declare_parameter("end_position_x", 0.3);
             declare_parameter("end_position_y", 0.0);
             declare_parameter("end_position_z", 0.4);
